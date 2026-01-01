@@ -1,3 +1,4 @@
+// src/components/Showroom.tsx
 import { useGLTF } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from "three";
@@ -12,11 +13,13 @@ export function Showroom() {
   const fuelRef = useRef<THREE.Object3D>(null);
 
   const fuel = useFuelCanInteraction(fuelRef, bikeRef);
+
   const FUEL_CAN_START: [number, number, number] = [
     0.9, // left of bike
     0.05, // platform height
     1.9, // slightly forward
   ];
+
   return (
     <>
       {/* 🏢 Showroom */}

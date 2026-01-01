@@ -18,7 +18,6 @@ export function ShowroomScene({ onExitShowroom }: ShowroomProps) {
       <directionalLight
         position={[5, 8, 5]}
         intensity={2}
-        castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
       />

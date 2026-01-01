@@ -1,3 +1,4 @@
+// src/components/FuelCan.tsx
 import { useGLTF } from "@react-three/drei";
 import { forwardRef } from "react";
 import * as THREE from "three";
@@ -19,17 +20,17 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
         object={scene}
         position={position}
         scale={0.6}
-        onPointerDown={(e:any) => {
+        onPointerDown={(e: any) => {
           e.stopPropagation();
           e.target.setPointerCapture(e.pointerId);
           onGrab();
         }}
-        onPointerMove={(e:any) => {
+        onPointerMove={(e: any) => {
           if (e.target.hasPointerCapture(e.pointerId)) {
             onMove(e.ray);
           }
         }}
-        onPointerUp={(e:any) => {
+        onPointerUp={(e: any) => {
           e.stopPropagation();
           e.target.releasePointerCapture(e.pointerId);
           onRelease();
@@ -38,6 +39,5 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
     );
   }
 );
-
 
 useGLTF.preload("/fuel_can.glb");

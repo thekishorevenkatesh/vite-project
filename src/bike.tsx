@@ -1,9 +1,11 @@
+// src/components/Bike.tsx
 import { useGLTF } from "@react-three/drei";
 import { useEffect } from "react";
 import * as THREE from "three";
 
 export function Bike() {
-  const gltf = useGLTF("/Bike.glb");
+  const gltf = useGLTF("/Bike.glb"); // now load compressed glb
+
 
   useEffect(() => {
     const scene = gltf.scene;
@@ -12,13 +14,12 @@ export function Bike() {
     const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
     const center = new THREE.Vector3();
-
     box.getSize(size);
     box.getCenter(center);
 
     // 🔹 Scale bike to fit showroom
     const maxAxis = Math.max(size.x, size.y, size.z);
-    const targetSize = 4.5; // showroom-friendly size
+    const targetSize = 4.5; 
     const scale = targetSize / maxAxis;
     scene.scale.setScalar(scale);
 
