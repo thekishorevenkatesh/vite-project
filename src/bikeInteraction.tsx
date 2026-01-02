@@ -1,9 +1,27 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import { Raycaster, Vector2, Object3D, Euler, Vector3 } from "three";
-import { AudioListener, Audio, AudioLoader } from "three";
+import {
+  Raycaster,
+  Vector2,
+  Object3D,
+  Euler,
+  Vector3,
+  AudioListener,
+  Audio,
+  AudioLoader,
+} from "three";
 
-export function BikeInteractionController() {
+type Props = {
+  onFuelLidChange: (open: boolean) => void;
+  fuelLevel: number;
+  showMessage: (msg: string) => void;
+};
+
+export function BikeInteractionController({
+  onFuelLidChange,
+  fuelLevel,
+  showMessage,
+}: Props) {
   const { camera, scene, gl } = useThree();
 
   const raycaster = useRef(new Raycaster());
@@ -20,9 +38,10 @@ export function BikeInteractionController() {
   const sidePanelRemoved = useRef(false);
   const batteryRemoved = useRef(false);
   const listener = useRef<AudioListener | null>(null);
-  const bikeOnSound = useRef<Audio | null>(null);
+  const startSound = useRef<Audio | null>(null);
+  const engineLoopSound = useRef<Audio | null>(null);
 
-  // Store original rotations ONCE
+  // Store original transforms once
   useEffect(() => {
     scene.traverse((obj) => {
       if (obj.name && !originalRotations.current.has(obj.name)) {
@@ -31,52 +50,51 @@ export function BikeInteractionController() {
       }
     });
   }, [scene]);
+
+  // Load sounds
   useEffect(() => {
     const audioListener = new AudioListener();
     camera.add(audioListener);
     listener.current = audioListener;
 
-    const sound = new Audio(audioListener);
     const loader = new AudioLoader();
 
+    const start = new Audio(audioListener);
     loader.load("/sounds/apache-not-starting.mp3", (buffer) => {
-      sound.setBuffer(buffer);
-      sound.setVolume(0.7);
+      start.setBuffer(buffer);
+      start.setVolume(0.7);
     });
+    startSound.current = start;
 
-    bikeOnSound.current = sound;
+    const loop = new Audio(audioListener);
+    loader.load("/sounds/apache_start_loop.mp3", (buffer) => {
+      loop.setBuffer(buffer);
+      loop.setLoop(true);
+      loop.setVolume(0.6);
+    });
+    engineLoopSound.current = loop;
 
     return () => {
       camera.remove(audioListener);
     };
   }, [camera]);
 
+  // Click handling
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const rect = gl.domElement.getBoundingClientRect();
-
       mouse.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
       raycaster.current.setFromCamera(mouse.current, camera);
-
       const hits = raycaster.current.intersectObjects(scene.children, true);
-
       if (!hits.length) return;
 
       const mesh = hits[0].object;
-      console.log("Clicked mesh:", mesh.name);
 
-      // KEY
-      if (mesh.name === "Scene164") toggleKey(mesh);
-
-      // SIDE STAND
+      if (mesh.name === "Scene282") toggleKey(mesh);
       if (mesh.name.startsWith("Side_stand_")) toggleStand(mesh);
-
-      // FUEL CAP
       if (mesh.name === "Key_led") toggleFuel(mesh);
-
-      // KILL SWITCH
       if (mesh.name === "KillSwitch") toggleKillSwitch(mesh);
       // SEAT
       if (mesh.name === "Seat") removeSeat(mesh);
@@ -87,7 +105,7 @@ export function BikeInteractionController() {
 
     gl.domElement.addEventListener("pointerdown", onClick);
     return () => gl.domElement.removeEventListener("pointerdown", onClick);
-  }, [camera, scene, gl]);
+  }, [camera, scene, gl, fuelLevel]);
 
   function reset(obj: Object3D) {
     const original = originalRotations.current.get(obj.name);
@@ -105,69 +123,75 @@ export function BikeInteractionController() {
     reset(obj);
     standOpen.current = !standOpen.current;
     obj.rotateZ(standOpen.current ? Math.PI / 3 : 0);
-    console.log("Side Stand:", standOpen.current ? "OPEN" : "CLOSE");
   }
 
   function toggleFuel(obj: Object3D) {
+    // 🔑 Key must be OFF to open fuel lid
+    if (keyOn.current) {
+      showMessage("Turn key OFF to open fuel lid");
+      return;
+    }
+
     reset(obj);
     fuelOpen.current = !fuelOpen.current;
     obj.rotateY(fuelOpen.current ? Math.PI / 2 : 0);
+    onFuelLidChange(fuelOpen.current);
+
     console.log("Fuel Cap:", fuelOpen.current ? "OPEN" : "CLOSE");
   }
 
   function toggleKillSwitch(obj: Object3D) {
-    reset(obj);
-    killSwitchOn.current = !killSwitchOn.current;
-
-    obj.rotateZ(killSwitchOn.current ? Math.PI / 1 : 0);
-
-    if (killSwitchOn.current && bikeOnSound.current) {
-      if (bikeOnSound.current.isPlaying) {
-        bikeOnSound.current.stop();
-      }
-      bikeOnSound.current.play();
+    // 🔒 Key dependency
+    if (!keyOn.current) {
+      showMessage("Turn key ON first");
+      return;
     }
 
-    console.log("Kill Switch:", killSwitchOn.current ? "ON" : "OFF");
+    // ⛽ Fuel lid dependency
+    if (fuelOpen.current) {
+      showMessage("Close fuel lid first");
+      return;
+    }
+
+    // 🦵 Side stand dependency
+    if (standOpen.current) {
+      showMessage("Lift side stand first");
+      return;
+    }
+
+    reset(obj);
+    killSwitchOn.current = !killSwitchOn.current;
+    obj.rotateZ(killSwitchOn.current ? Math.PI : 0);
+
+    if (killSwitchOn.current) {
+      startSound.current?.play();
+
+      if (fuelLevel === 100 && engineLoopSound.current) {
+        engineLoopSound.current.play();
+      }
+    } else {
+      engineLoopSound.current?.stop();
+    }
+
+    console.log(
+      "Kill:",
+      killSwitchOn.current,
+      "| Fuel:",
+      fuelLevel,
+      "| Stand:",
+      standOpen.current ? "DOWN" : "UP",
+      "| Fuel Lid:",
+      fuelOpen.current ? "OPEN" : "CLOSED"
+    );
   }
 
-  //   function removeSeat(obj: Object3D) {
-  //     reset(obj);
-  //     seatRemoved.current = !seatRemoved.current;
+  // Safety: stop engine if fuel drops
+  useEffect(() => {
+    if (fuelLevel < 100 && engineLoopSound.current?.isPlaying) {
+      engineLoopSound.current.stop();
+    }
+  }, [fuelLevel]);
 
-  //     if (seatRemoved.current) {
-  //       // create the plane once
-  //       const plane = new Plane(new Vector3(0, 1, 0), 0);
-  //       const intersection = new Vector3();
-
-  //       const onMouseMove = (e: MouseEvent) => {
-  //         const rect = gl.domElement.getBoundingClientRect();
-  //         mouse.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-  //         mouse.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-  //         raycaster.current.setFromCamera(mouse.current, camera);
-  //         if (raycaster.current.ray.intersectPlane(plane, intersection)) {
-  //           // Smooth movement using lerp
-  //           obj.position.lerp(intersection, 0.1); // 0.1 controls speed; smaller = slower
-  //         }
-  //       };
-
-  //       const onMouseUp = () => {
-  //         gl.domElement.removeEventListener("pointermove", onMouseMove);
-  //         gl.domElement.removeEventListener("pointerup", onMouseUp);
-  //         console.log("Seat placed");
-  //       };
-
-  //       gl.domElement.addEventListener("pointermove", onMouseMove);
-  //       gl.domElement.addEventListener("pointerup", onMouseUp);
-  //       console.log("Seat removed - drag to move");
-  //     } else {
-  //       const originalPosition =
-  //         originalPositions.current.get(obj.name) || obj.position.clone();
-  //       obj.position.copy(originalPosition);
-  //       console.log("Seat restored");
-  //     }
-  //   }
   function removeSeat(obj: Object3D) {
     reset(obj);
     seatRemoved.current = !seatRemoved.current;
@@ -210,6 +234,7 @@ export function BikeInteractionController() {
       console.log("Side panel restored");
     }
   }
+  
   function removeBattery(obj: Object3D) {
     if (!sidePanelRemoved.current) {
       console.log("Remove side panel first");
@@ -227,6 +252,5 @@ export function BikeInteractionController() {
       console.log("Battery restored");
     }
   }
-
   return null;
 }
