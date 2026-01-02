@@ -2,10 +2,8 @@ import { Html } from "@react-three/drei";
 
 export function IntroScene({
   onEnter,
-  onAbout,
 }: {
   onEnter: () => void;
-  onAbout: () => void;
 }) {
   return (
     <Html center>
@@ -18,11 +16,6 @@ export function IntroScene({
 
         <button style={styles.button} onClick={onEnter}>
           Enter Showroom
-        </button>
-
-        {/* New About button */}
-        <button style={{ ...styles.button, marginTop: "12px", background: "#ffcc00", color: "#1b1b1b" }} onClick={onAbout}>
-          About This Project
         </button>
 
         <p style={styles.hint}>

@@ -1,42 +1,35 @@
-// src/components/Showroom.tsx
 import { useGLTF } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from "three";
 import { Bike } from "./bike";
 import { FuelCan } from "./fuelCan";
-import { useFuelCanInteraction } from "./fuelCanInteraction";
 
-export function Showroom() {
+type Props = {
+  setFuelLevel: (v: number) => void;
+  isFuelLidOpen: boolean;
+  showMessage: (msg: string) => void;
+};
+
+export function Showroom({ setFuelLevel, isFuelLidOpen,showMessage }: Props) {
   const { scene } = useGLTF("/showroom.glb");
 
   const bikeRef = useRef<THREE.Object3D>(null);
-  const fuelRef = useRef<THREE.Object3D>(null);
 
-  const fuel = useFuelCanInteraction(fuelRef, bikeRef);
-
-  const FUEL_CAN_START: [number, number, number] = [
-    0.9, // left of bike
-    0.05, // platform height
-    1.9, // slightly forward
-  ];
+  const FUEL_CAN_START: [number, number, number] = [0.9, 0.05, 1.9];
 
   return (
     <>
-      {/* 🏢 Showroom */}
       <primitive object={scene} />
 
-      {/* 🏍 Bike */}
       <group ref={bikeRef}>
         <Bike />
       </group>
 
-      {/* ⛽ Fuel Can */}
       <FuelCan
-        ref={fuelRef}
         position={FUEL_CAN_START}
-        onGrab={fuel.grab}
-        onMove={fuel.move}
-        onRelease={fuel.release}
+        isFuelLidOpen={isFuelLidOpen}
+        onFillFuel={() => setFuelLevel(100)}
+        showMessage={showMessage}
       />
     </>
   );
