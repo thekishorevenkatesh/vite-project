@@ -172,7 +172,7 @@ export function BikeInteractionController() {
     reset(obj);
     seatRemoved.current = !seatRemoved.current;
     if (seatRemoved.current) {
-      obj.position.set(-200, 0, -100);
+      obj.position.set(2, 0.5, 0);
       console.log("Seat removed");
     } else {
       if (sidePanelRemoved.current) {
@@ -196,7 +196,7 @@ export function BikeInteractionController() {
     reset(obj);
     sidePanelRemoved.current = !sidePanelRemoved.current;
     if (sidePanelRemoved.current) {
-      obj.position.set(-300, 0, -100); // Move the side panel outside the bike
+      obj.position.set(-2, 0.5, 0); // Move the side panel outside the bike
       console.log("Side panel removed");
     } else {
       if (batteryRemoved.current) {
@@ -218,7 +218,7 @@ export function BikeInteractionController() {
     reset(obj);
     batteryRemoved.current = !batteryRemoved.current;
     if (batteryRemoved.current) {
-      obj.position.set(-400, 0, -100); // Move the battery outside the bike
+      obj.position.set(-3, 0.5, 0); // Move the battery outside the bike
       console.log("Battery removed");
     } else {
       const originalPosition =

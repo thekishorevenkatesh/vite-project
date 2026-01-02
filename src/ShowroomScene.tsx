@@ -41,12 +41,12 @@ export function ShowroomScene({ onExitShowroom }: ShowroomProps) {
       {/* Showroom + Bike + Fuel Can */}
       <Showroom />
       <BikeInteractionController />
-      <CameraController onExit={onExitShowroom} />
+      {/* <CameraController onExit={onExitShowroom} /> */}
 
       {/* Controls */}
       <OrbitControls
-        enableRotate={false}
-        enablePan={false}
+        // enableRotate={false}
+        // enablePan={false}
         // enableZoom={false}
         target={[0, 1, 0]}
         minPolarAngle={Math.PI / 4}
