@@ -63,7 +63,7 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
       >
         {/* Fill Fuel button */}
         {hovered && (
-          <Html position={[0, 0.3, 0]} center distanceFactor={8}>
+          <Html position={[0, 0.2, 0]} center distanceFactor={8}>
             <div
               onClick={(e) => {
                 e.stopPropagation();

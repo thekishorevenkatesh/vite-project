@@ -38,9 +38,9 @@ export const STEPS = [
     description: "Fill fuel using funnel and fuel can",
     functionalComponent: [
       {
-        component: "FUEL_TANK",
+        component: "FUEL_CAN",
         attributeInitialValues: [
-          { uniqueIdentifier: "FUEL_TANK", initialValue: 1 }
+          { uniqueIdentifier: "FUEL_CAN", initialValue: 1 }
         ]
       }
     ],
