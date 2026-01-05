@@ -49,6 +49,16 @@ export function BikeInteractionController({
 
   const [popupMsg, setPopupMsg] = useState<string | null>(null);
 
+  // ------------------ AUTO HIDE POPUP ------------------
+  useEffect(() => {
+    if (!popupMsg) return;
+
+    const timer = setTimeout(() => {
+      setPopupMsg(null);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [popupMsg]);
   // ------------------ STORE ORIGINAL TRANSFORMS ------------------
   useEffect(() => {
     scene.traverse((obj) => {
@@ -297,6 +307,9 @@ export function BikeInteractionController({
           padding: "16px 24px",
           borderRadius: "12px",
           fontWeight: "bold",
+          whiteSpace: "nowrap",
+          pointerEvents: "none",
+          userSelect: "none",
         }}
       >
         {popupMsg}
