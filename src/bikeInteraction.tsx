@@ -1,4 +1,5 @@
 import { useThree } from "@react-three/fiber";
+import { useDashboardAnimation } from "./dashboardAnimation";
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Raycaster,
@@ -48,6 +49,7 @@ export function BikeInteractionController({
   const engineLoopSound = useRef<Audio | null>(null);
 
   const [popupMsg, setPopupMsg] = useState<string | null>(null);
+  const [isKeyOn, setIsKeyOn] = useState(false);
 
   // ------------------ AUTO HIDE POPUP ------------------
   useEffect(() => {
@@ -116,11 +118,19 @@ export function BikeInteractionController({
     const rot = originalRotations.current.get(obj.name);
     if (rot) obj.rotation.copy(rot);
   }
+  //--------------Dashboard Animation------------------
+  useDashboardAnimation({
+    scene,
+    offSpriteUrl: "/KeyIginition001.png",
+    onSpriteUrl: "/BikeStart.png",
+    enabled: isKeyOn,
+  });
 
   // ------------------ TOGGLE FUNCTIONS ------------------
   function toggleKey(obj: Object3D) {
     reset(obj);
     keyOn.current = !keyOn.current;
+    setIsKeyOn(keyOn.current);
     obj.rotateX(keyOn.current ? Math.PI / 3 : 0);
     console.log("Key:", keyOn.current ? "ON" : "OFF");
   }
@@ -282,6 +292,13 @@ export function BikeInteractionController({
       if (!hits.length) return;
 
       const mesh = hits[0].object;
+
+      console.log(
+        "🟡 Clicked mesh:",
+        mesh.name,
+        "| Parent:",
+        mesh.parent?.name
+      );
 
       if (mesh.name === "Scene282") toggleKey(mesh);
       if (mesh.name.startsWith("Side_stand_")) toggleStand(mesh);
