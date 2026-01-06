@@ -5,23 +5,40 @@ import { ShowroomScene } from "./ShowroomScene";
 import { FuelGauge } from "./FuelGauge";
 import { STEPS } from "./steps";
 
+// 🔹 NAV BUTTON STYLES
+const navButtonStyle: React.CSSProperties = {
+  width: 42,
+  height: 42,
+  borderRadius: "50%",
+  border: "none",
+  background: "#ffffff",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+  transition: "all 0.2s ease",
+};
+
+const disabledStyle: React.CSSProperties = {
+  opacity: 0.4,
+  cursor: "not-allowed",
+};
+
 export default function App() {
   const [entered, setEntered] = useState(false);
-
   const [fuelLevel, setFuelLevel] = useState(0);
   const [isFuelLidOpen, setIsFuelLidOpen] = useState(false);
 
-  // 🔹 STEP STATE (single source of truth)
+  // 🔹 STEP STATE
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-
   const currentStep = STEPS[currentStepIndex];
 
-  // 🔹 AUTO STEP ADVANCE LISTENER (from mesh clicks)
+  // 🔹 AUTO STEP ADVANCE LISTENER
   useEffect(() => {
     const nextStep = () => {
       setCurrentStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
     };
-
     window.addEventListener("STEP_NEXT", nextStep);
     return () => window.removeEventListener("STEP_NEXT", nextStep);
   }, []);
@@ -51,13 +68,28 @@ export default function App() {
             zIndex: 50,
           }}
         >
+          {/* ◀ PREV BUTTON */}
           <button
             disabled={currentStepIndex === 0}
             onClick={() => setCurrentStepIndex((i) => Math.max(i - 1, 0))}
+            style={{
+              ...navButtonStyle,
+              ...(currentStepIndex === 0 ? disabledStyle : {}),
+            }}
           >
-            ◀ Prev
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path
+                d="M15 18l-6-6 6-6"
+                fill="none"
+                stroke="#333"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
 
+          {/* STEP CARD */}
           <div
             style={{
               padding: "12px 18px",
@@ -88,13 +120,27 @@ export default function App() {
             </div>
           </div>
 
+          {/* NEXT BUTTON ▶ */}
           <button
             disabled={currentStepIndex === STEPS.length - 1}
             onClick={() =>
               setCurrentStepIndex((i) => Math.min(i + 1, STEPS.length - 1))
             }
+            style={{
+              ...navButtonStyle,
+              ...(currentStepIndex === STEPS.length - 1 ? disabledStyle : {}),
+            }}
           >
-            Next ▶
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path
+                d="M9 6l6 6-6 6"
+                fill="none"
+                stroke="#333"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         </div>
       )}
