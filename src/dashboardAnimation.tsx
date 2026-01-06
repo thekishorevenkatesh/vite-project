@@ -35,8 +35,8 @@ export function useDashboardAnimation({
     const offTextureRef = useRef<Texture | null>(null);
     const intervalRef = useRef<number | null>(null);
     const hasPlayedRef = useRef(false);
-    const BASE_OFFSET_X = -0.009;
-    const BASE_OFFSET_Y = 0.002;
+    const BASE_OFFSET_X = -0.006;
+    const BASE_OFFSET_Y = 0.0035;
 
 
 
@@ -56,8 +56,7 @@ export function useDashboardAnimation({
             const clonedMat = originalMat.clone();
             clonedMat.map = null;
             clonedMat.transparent = true;
-            //   clonedMat.needsUpdate = true;
-
+         
             obj.material = clonedMat;
             materialRef.current = clonedMat;
 
@@ -127,7 +126,7 @@ export function useDashboardAnimation({
             hasPlayedRef.current = false;
             if (offTextureRef.current) {
                 material.map = offTextureRef.current;
-                material.map.offset.set(0, 0);
+                material.map.offset.set(BASE_OFFSET_X, BASE_OFFSET_Y);
                 material.map.repeat.set(1, 1);
                 material.needsUpdate = true;
             }
