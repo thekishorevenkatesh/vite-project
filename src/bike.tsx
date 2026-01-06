@@ -1,54 +1,54 @@
-// src/components/Bike.tsx
 import { useGLTF } from "@react-three/drei";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 
 export function Bike() {
-  const gltf = useGLTF("/Bike.glb"); // now load compressed glb
+  const gltf = useGLTF("/Bike.glb");
 
+  // ✅ CLONE THE SCENE (CRITICAL)
+  const bikeScene = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
 
   useEffect(() => {
-    const scene = gltf.scene;
+    // 🔹 Reset scale & position defensively
+    bikeScene.scale.set(1, 1, 1);
+    bikeScene.position.set(0, 0, 0);
 
     // 🔹 Compute bounding box
-    const box = new THREE.Box3().setFromObject(scene);
+    const box = new THREE.Box3().setFromObject(bikeScene);
     const size = new THREE.Vector3();
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
 
-    // 🔹 Scale bike to fit showroom
+    // 🔹 Normalize size
     const maxAxis = Math.max(size.x, size.y, size.z);
-    const targetSize = 4.5; 
+    const targetSize =2.5;
     const scale = targetSize / maxAxis;
-    scene.scale.setScalar(scale);
 
-    // 🔹 Recalculate after scaling
-    box.setFromObject(scene);
+    bikeScene.scale.setScalar(scale);
+
+    // 🔹 Recenter
+    box.setFromObject(bikeScene);
     box.getCenter(center);
+    bikeScene.position.sub(center);
 
-    // 🔹 Center bike
-    scene.position.sub(center);
+    // 🔹 Place on ground
+    box.setFromObject(bikeScene);
+    bikeScene.position.y -= box.min.y;
 
-    // 🔹 Place bike on floor (Y = 0)
-    box.setFromObject(scene);
-    scene.position.y -= box.min.y;
-
-    // 🔹 Enable shadows
-    scene.traverse((obj) => {
+    // 🔹 Shadows
+    bikeScene.traverse((obj) => {
       if ((obj as THREE.Mesh).isMesh) {
         obj.castShadow = true;
         obj.receiveShadow = true;
       }
     });
-  }, [gltf]);
+  }, [bikeScene]);
 
   return (
     <primitive
-      object={gltf.scene}
-      position={[0, 0, -0]}
+      object={bikeScene}
       rotation={[0, Math.PI / 2, 0]}
-      scale={1.2}
     />
   );
 }

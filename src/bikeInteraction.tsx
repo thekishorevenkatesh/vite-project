@@ -135,10 +135,15 @@ export function BikeInteractionController({
   // ------------------ TOGGLE FUNCTIONS ------------------
   function toggleKey(obj: Object3D) {
     reset(obj);
+
     keyOn.current = !keyOn.current;
     setIsKeyOn(keyOn.current);
     obj.rotateX(keyOn.current ? Math.PI / 3 : 0);
-    console.log("Key:", keyOn.current ? "ON" : "OFF");
+
+    if (keyOn.current) {
+      // Key turned ON → step completed
+      window.dispatchEvent(new Event("STEP_NEXT"));
+    }
   }
 
   function toggleStand(obj: Object3D) {
@@ -147,11 +152,8 @@ export function BikeInteractionController({
     standOpen.current = !standOpen.current;
     obj.rotateZ(standOpen.current ? Math.PI / 3 : 0);
 
-    const state = standOpen.current ? "DOWN" : "UP";
-    console.log("Side Stand:", state);
-
-    if (state == "UP") {
-      onMeshClick?.(obj.name);
+    if (!standOpen.current) {
+      window.dispatchEvent(new Event("STEP_NEXT"));
     }
   }
 

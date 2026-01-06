@@ -4,21 +4,30 @@ export function IntroScene({ onEnter }: { onEnter: () => void }) {
   return (
     <>
       {/* 🔹 CENTER CARD */}
-      <Html center>
-        <div style={styles.container}>
-          <h1 style={styles.title}>Motorcycle Workshop</h1>
+      <Html fullscreen>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "auto",
+          }}
+        >
+          <div style={styles.container}>
+            <h1 style={styles.title}>Motorcycle Workshop</h1>
 
-          <p style={styles.subtitle}>
-            Interactive 3D Training Experience
-          </p>
+            <p style={styles.subtitle}>Interactive 3D Training Experience</p>
 
-          <button style={styles.button} onClick={onEnter}>
-            Enter Workshop
-          </button>
+            <button style={styles.button} onClick={onEnter}>
+              Enter Workshop
+            </button>
 
-          <p style={styles.hint}>
-            Click on bike highlighted components to interact
-          </p>
+            <p style={styles.hint}>
+              Click on bike highlighted components to interact
+            </p>
+          </div>
         </div>
       </Html>
 

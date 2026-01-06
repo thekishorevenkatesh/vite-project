@@ -24,7 +24,6 @@ export function Showroom({ setFuelLevel, isFuelLidOpen, showMessage }: Props) {
       <group ref={bikeRef}>
         <Bike />
       </group>
-
       <group position={FUEL_CAN_START}>
         <FuelCan
           isFuelLidOpen={isFuelLidOpen}
@@ -35,7 +34,6 @@ export function Showroom({ setFuelLevel, isFuelLidOpen, showMessage }: Props) {
           }}
         />
       </group>
-
     </>
   );
 }
