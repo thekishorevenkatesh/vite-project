@@ -70,7 +70,7 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
 
     useEffect(() => {
       materials.forEach((mat) => {
-        mat.emissive.set(hovered ? "#ffae00" : "#000000");
+        mat.emissive.set(hovered ? "#1e6bff" : "#000000");
         mat.emissiveIntensity = hovered ? 0.6 : 0;
       });
     }, [hovered, materials]);
