@@ -23,7 +23,8 @@ type Props = {
 export function BikeInteractionController({
   onFuelLidChange,
   fuelLevel,
-  showMessage,onMeshClick
+  showMessage,
+  onMeshClick,
 }: Props) {
   const { camera, scene, gl } = useThree();
 
@@ -35,7 +36,7 @@ export function BikeInteractionController({
   const originalRotations = useRef<Map<string, Euler>>(new Map());
 
   const keyOn = useRef(false);
-  const standOpen = useRef(false);
+  const standOpen = useRef(true);
   const fuelOpen = useRef(false);
   const killSwitchOn = useRef(false);
 
@@ -68,6 +69,11 @@ export function BikeInteractionController({
       if (obj.name && !originalRotations.current.has(obj.name)) {
         originalRotations.current.set(obj.name, obj.rotation.clone());
         originalPositions.current.set(obj.name, obj.position.clone());
+      }
+
+      // 🦶 Side stand OPEN by default
+      if (obj.name.startsWith("Side_stand_") && standOpen.current) {
+        obj.rotateZ(Math.PI / 3);
       }
     });
   }, [scene]);
@@ -126,7 +132,6 @@ export function BikeInteractionController({
     onSpriteUrl: "/BikeStart.png",
     enabled: isKeyOn,
   });
-
   // ------------------ TOGGLE FUNCTIONS ------------------
   function toggleKey(obj: Object3D) {
     reset(obj);
@@ -138,9 +143,16 @@ export function BikeInteractionController({
 
   function toggleStand(obj: Object3D) {
     reset(obj);
+
     standOpen.current = !standOpen.current;
     obj.rotateZ(standOpen.current ? Math.PI / 3 : 0);
-    console.log("Side Stand:", standOpen.current ? "DOWN" : "UP");
+
+    const state = standOpen.current ? "DOWN" : "UP";
+    console.log("Side Stand:", state);
+
+    if (state == "UP") {
+      onMeshClick?.(obj.name);
+    }
   }
 
   function toggleFuel(obj: Object3D) {
@@ -335,5 +347,3 @@ export function BikeInteractionController({
     </Html>
   ) : null;
 }
-
-

@@ -32,6 +32,7 @@ export function FuelGauge({ fuel, size }: FuelGaugeProps) {
         fontSize: fontSize,
         zIndex: 10,
         pointerEvents: "auto",
+        fontFamily: "Open Sans, sans-serif",
       }}
     >
       <div style={{ marginBottom: padding / 2 }}>Fuel</div>
@@ -55,9 +56,7 @@ export function FuelGauge({ fuel, size }: FuelGaugeProps) {
         />
       </div>
 
-      <div style={{ marginTop: padding / 2, textAlign: "right" }}>
-        {fuel}%
-      </div>
+      <div style={{ marginTop: padding / 2, textAlign: "right" }}>{fuel}%</div>
     </div>
   );
 }

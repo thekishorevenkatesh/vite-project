@@ -1,4 +1,4 @@
-import { useGLTF, Html } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import { forwardRef, useEffect, useMemo, useState, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
@@ -18,7 +18,7 @@ type PourState =
   | "returning";
 
 export const FuelCan = forwardRef<THREE.Object3D, Props>(
-  ({ onFillFuel, isFuelLidOpen, showMessage, onFuelFilled }) => {
+  ({ onFillFuel, isFuelLidOpen, showMessage, onFuelFilled }, ref) => {
     const { scene } = useGLTF("/fuel_can.glb");
 
     const localRef = useRef<THREE.Object3D | null>(null);
@@ -30,16 +30,13 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
     const originalPosition = useRef(new THREE.Vector3());
     const originalRotation = useRef(new THREE.Euler());
 
-    /* ---------------- Capture original transform ---------------- */
+    // Capture original transform
     useEffect(() => {
       if (!localRef.current) return;
       originalPosition.current.copy(localRef.current.position);
       originalRotation.current.copy(localRef.current.rotation);
     }, []);
 
-    /* ---------------------------------- */
-    /* Target pour transform               */
-    /* ---------------------------------- */
     const tankPosition = useMemo(
       () => new THREE.Vector3(-0.85, 1.3, -2.45),
       []
@@ -50,7 +47,7 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
       []
     );
 
-    // clone materials for glow
+    // Clone materials for hover glow
     const materials = useMemo(() => {
       const mats: THREE.MeshStandardMaterial[] = [];
       scene.traverse((obj) => {
@@ -70,14 +67,12 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
       });
     }, [hovered, materials]);
 
-    // auto-hide error after 2 seconds
     useEffect(() => {
       if (!showError) return;
       const t = setTimeout(() => setShowError(false), 2000);
       return () => clearTimeout(t);
     }, [showError]);
 
-    /**------------Animation loop-------------------- */
     useFrame(() => {
       if (!localRef.current) return;
       const obj = localRef.current;
@@ -100,7 +95,7 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
             setPourState("pouring");
             setTimeout(() => {
               setPourState("returning");
-            }, 500); // wait half sec
+            }, 500);
           }
           break;
 
@@ -111,9 +106,11 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
             originalRotation.current.x,
             0.08
           );
+
           const finishedReturning =
             obj.position.distanceTo(originalPosition.current) < 0.02 &&
             Math.abs(obj.rotation.x - originalRotation.current.x) < 0.02;
+
           if (finishedReturning) {
             setPourState("idle");
             onFuelFilled?.();
@@ -123,80 +120,41 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
     });
 
     return (
-      <primitive
-        ref={localRef}
-        object={scene}
+      <group
+        ref={(node) => {
+          localRef.current = node;
+          if (typeof ref === "function") ref(node);
+          else if (ref) ref.current = node;
+        }}
         scale={0.6}
-        onPointerOver={(e: any) => {
-          e.stopPropagation();
-          if (pourState !== "idle") return;
-          setHovered(true);
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={(e: any) => {
-          e.stopPropagation();
-          setHovered(false);
-          document.body.style.cursor = "default";
-        }}
       >
-        {/* Fill Fuel button */}
-        {hovered && pourState === "idle" && (
-          <Html position={[0, 0.2, 0]} center distanceFactor={8}>
-            <div
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
+        <primitive object={scene} />
 
-                if (!isFuelLidOpen) {
-                  showMessage("Open fuel lid first");
-                  return;
-                }
+        {pourState === "idle" && (
+          <mesh
+            position={[0, 0.25, 0]}
+            scale={[0.3, 0.1, 0.3]}
+            onPointerOver={() => setHovered(true)}
+            onPointerOut={() => setHovered(false)}
+            onPointerDown={(e) => {
+              e.stopPropagation();
 
-                console.log("🚀 Starting pour animation");
-                setPourState("movingToTank");
-                onFillFuel();
-              }}
-              style={{
-                padding: "5px 10px",
-                background: "rgba(0,0,0,0.85)",
-                color: "#fff",
-                borderRadius: 4,
-                fontSize: 10,
-                cursor: "pointer",
-                userSelect: "none",
-                whiteSpace: "nowrap",
-                touchAction: "none",
-              }}
-            >
-              Fill Fuel
-            </div>
-          </Html>
+              if (!isFuelLidOpen) {
+                showMessage("Open fuel lid first");
+                setShowError(true);
+                return;
+              }
+
+              console.log("🚀 Starting pour animation");
+              setPourState("movingToTank");
+              onFillFuel();
+            }}
+          >
+            <boxGeometry args={[1, 1, 1]} />
+            <meshBasicMaterial transparent opacity={0} />
+          </mesh>
         )}
-
-        {/* Error popup */}
-        {showError && (
-          <Html center>
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                padding: "10px 16px",
-                background: "rgba(200,0,0,0.9)",
-                color: "#fff",
-                borderRadius: 6,
-                fontSize: 14,
-                whiteSpace: "nowrap",
-                pointerEvents: "none",
-                userSelect: "none",
-              }}
-            >
-              Open fuel lid first
-            </div>
-          </Html>
-        )}
-      </primitive>
+      </group>
     );
   }
 );

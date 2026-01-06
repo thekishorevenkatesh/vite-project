@@ -1,22 +1,5 @@
 export const STEPS = [
   {
-    id: "step_001",
-    name: "Turn On Ignition Key",
-    description:
-      "Switch the ignition key to the ON position to enable system checks before fuel filling.",
-    functionalComponent: [
-      {
-        component: "IGNITION_KEY",
-        attributeInitialValues: [
-          { uniqueIdentifier: "IGNITION_KEY", initialValue: "ON" }
-        ]
-      }
-    ],
-    nonFunctionalComponent: [],
-    assets: [],
-    tenantId: "tvs_training_001"
-  },
-  {
     id: "step_002",
     name: "Lid open",
     description: "Open the petrol lid to fill fuel",
@@ -65,14 +48,15 @@ export const STEPS = [
     tenantId: "tvs_training_001"
   },
   {
-    id: "step_005",
-    name: "Kill Switch",
-    description: "Turn off kill switch",
+    id: "step_001",
+    name: "Turn ON Ignition Key",
+    description:
+      "Switch the ignition key to the ON position to enable system checks before fuel filling.",
     functionalComponent: [
       {
-        component: "KILL_SWITCH",
+        component: "IGNITION_KEY",
         attributeInitialValues: [
-          { uniqueIdentifier: "KILL_SWITCH", initialValue: "ON" }
+          { uniqueIdentifier: "IGNITION_KEY", initialValue: "OFF" }
         ]
       }
     ],
@@ -81,14 +65,14 @@ export const STEPS = [
     tenantId: "tvs_training_001"
   },
   {
-    id: "step_006",
-    name: "Bike Start",
-    description: "Press the start button",
+    id: "step_005",
+    name: "Kill Switch",
+    description: "Turn off kill switch",
     functionalComponent: [
       {
-        component: "START_BUTTON",
+        component: "KILL_SWITCH",
         attributeInitialValues: [
-          { uniqueIdentifier: "START_BUTTON", initialValue: "Pressed" }
+          { uniqueIdentifier: "KILL_SWITCH", initialValue: "ON" }
         ]
       }
     ],

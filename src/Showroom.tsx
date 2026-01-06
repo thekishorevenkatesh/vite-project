@@ -40,4 +40,4 @@ export function Showroom({ setFuelLevel, isFuelLidOpen, showMessage }: Props) {
   );
 }
 
-useGLTF.preload("/showroom.glb");
+useGLTF.preload("/Show room v1(1).glb");
