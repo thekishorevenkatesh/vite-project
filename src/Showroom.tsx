@@ -25,15 +25,17 @@ export function Showroom({ setFuelLevel, isFuelLidOpen, showMessage }: Props) {
         <Bike />
       </group>
 
-      <FuelCan
-        position={FUEL_CAN_START}
-        isFuelLidOpen={isFuelLidOpen}
-        onFillFuel={() => setFuelLevel(100)}
-        showMessage={showMessage}
-        onFuelFilled={() => {
-          window.dispatchEvent(new Event("STEP_NEXT"));
-        }}
-      />
+      <group position={FUEL_CAN_START}>
+        <FuelCan
+          isFuelLidOpen={isFuelLidOpen}
+          onFillFuel={() => setFuelLevel(100)}
+          showMessage={showMessage}
+          onFuelFilled={() => {
+            window.dispatchEvent(new Event("STEP_NEXT"));
+          }}
+        />
+      </group>
+
     </>
   );
 }

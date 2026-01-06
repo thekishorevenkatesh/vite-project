@@ -1,21 +1,59 @@
 import { useGLTF, Html } from "@react-three/drei";
-import { forwardRef, useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState, useRef } from "react";
 import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 type Props = {
-  position: [number, number, number];
+  // position: [number, number, number];
   onFillFuel: () => void;
   isFuelLidOpen: boolean;
   showMessage: (msg: string) => void;
   onFuelFilled?: () => void;
 };
 
+type PourState =
+  | "idle"
+  | "movingToTank"
+  | "tilting"
+  | "pouring"
+  | "returning";
+
 export const FuelCan = forwardRef<THREE.Object3D, Props>(
-  ({ position, onFillFuel, isFuelLidOpen, showMessage, onFuelFilled }, ref) => {
+  ({ onFillFuel, isFuelLidOpen, showMessage, onFuelFilled }, ref) => {
     const { scene } = useGLTF("/fuel_can.glb");
+
+    const localRef = useRef<THREE.Object3D | null>(null);
 
     const [hovered, setHovered] = useState(false);
     const [showError, setShowError] = useState(false);
+    const [pourState, setPourState] = useState<PourState>("idle");
+
+    const originalPosition = useRef(new THREE.Vector3());
+    const originalRotation = useRef(new THREE.Euler());
+
+    /* ---------------- Capture original transform ---------------- */
+    useEffect(() => {
+
+      if (!localRef.current) return;
+      originalPosition.current.copy(localRef.current.position);
+      originalRotation.current.copy(localRef.current.rotation);
+    }, []);
+
+
+
+    /* ---------------------------------- */
+    /* Target pour transform               */
+    /* ---------------------------------- */
+    const tankPosition = useMemo(
+      () => new THREE.Vector3(-0.85, 1.3, -2.45), // adjust later
+      []
+    );
+
+    const pourRotation = useMemo(
+      () => new THREE.Euler(Math.PI / 2.2, 0, 0),
+      []
+    );
+
 
     // clone materials for glow
     const materials = useMemo(() => {
@@ -44,14 +82,62 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
       return () => clearTimeout(t);
     }, [showError]);
 
+    /**------------Animation loop-------------------- */
+    useFrame(() => {
+      if (!localRef.current) return;
+      const obj = localRef.current;
+
+      switch (pourState) {
+        case "movingToTank":
+          obj.position.lerp(tankPosition, 0.05);
+          if (obj.position.distanceTo(tankPosition) < 0.02) {
+            setPourState("tilting");
+          }
+          break;
+
+        case "tilting":
+          obj.rotation.x = THREE.MathUtils.lerp(
+            obj.rotation.x,
+            pourRotation.x,
+            0.08
+          );
+          if (Math.abs(obj.rotation.x - pourRotation.x) < 0.02) {
+            setPourState("pouring");
+            setTimeout(() => {
+              setPourState("returning");
+            }, 500); // wait half sec
+          }
+          break;
+
+        case "returning":
+          obj.position.lerp(originalPosition.current, 0.05);
+          obj.rotation.x = THREE.MathUtils.lerp(
+            obj.rotation.x,
+            originalRotation.current.x,
+            0.08
+          );
+          const finishedReturning =
+            obj.position.distanceTo(originalPosition.current) < 0.02 &&
+            Math.abs(obj.rotation.x - originalRotation.current.x) < 0.02;
+          if (
+            finishedReturning
+          ) {
+            setPourState("idle");
+            onFuelFilled?.();
+          }
+          break;
+      }
+    });
+
+
     return (
       <primitive
-        ref={ref}
+        ref={localRef}
         object={scene}
-        position={position}
         scale={0.6}
         onPointerOver={(e: any) => {
           e.stopPropagation();
+          if (pourState !== "idle") return;
           setHovered(true);
           document.body.style.cursor = "pointer";
         }}
@@ -62,7 +148,7 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
         }}
       >
         {/* Fill Fuel button */}
-        {hovered && (
+        {hovered && pourState === "idle" && (
           <Html position={[0, 0.2, 0]} center distanceFactor={8}>
             <div
               onClick={(e) => {
@@ -73,8 +159,10 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
                   return;
                 }
 
+                console.log("🚀 Starting pour animation");
+                setPourState("movingToTank");
                 onFillFuel();
-                onFuelFilled?.();
+
               }}
               style={{
                 padding: "5px 10px",
