@@ -2,6 +2,8 @@ import { useGLTF } from "@react-three/drei";
 import { forwardRef, useEffect, useMemo, useState, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
+import { FuelStream } from "./fuelStream";
+
 
 type Props = {
   onFillFuel: () => void;
@@ -30,6 +32,9 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
     const originalPosition = useRef(new THREE.Vector3());
     const originalRotation = useRef(new THREE.Euler());
 
+    const spoutRef = useRef<THREE.Object3D | null>(null);
+
+
     // Capture original transform
     useEffect(() => {
       if (!localRef.current) return;
@@ -38,7 +43,7 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
     }, []);
 
     const tankPosition = useMemo(
-      () => new THREE.Vector3(-0.85, 1.3, -2.45),
+      () => new THREE.Vector3(-0.88, 1.5, -2.43),
       []
     );
 
@@ -92,10 +97,12 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
             0.08
           );
           if (Math.abs(obj.rotation.x - pourRotation.x) < 0.02) {
+            console.log("FuelCan: Entering POURING state");
             setPourState("pouring");
             setTimeout(() => {
+              console.log("FuelCan: Leaving POURING state");
               setPourState("returning");
-            }, 500);
+            }, 2000);
           }
           break;
 
@@ -128,8 +135,23 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
         }}
         scale={0.6}
       >
-        <primitive object={scene} />
+        <group ref={localRef} scale={0.6}>
+          <primitive object={scene} />
+          <mesh
+            ref={spoutRef}
+            position={[0, 0.45, 0.12]} //  tweak visually
+            visible={false}
+          >
+            <sphereGeometry args={[0.02]} />
+            <meshBasicMaterial color="red" />
+          </mesh>
+          <FuelStream
+            canRef={localRef}
+            enabled={pourState === "pouring"}
+          />
 
+
+        </group>
         {pourState === "idle" && (
           <mesh
             position={[0, 0.25, 0]}
@@ -145,7 +167,7 @@ export const FuelCan = forwardRef<THREE.Object3D, Props>(
                 return;
               }
 
-              console.log("🚀 Starting pour animation");
+              console.log("Starting pour animation");
               setPourState("movingToTank");
               onFillFuel();
             }}
