@@ -33,6 +33,7 @@ export default function App() {
   const [entered, setEntered] = useState(false);
   const [fuelLevel, setFuelLevel] = useState(0);
   const [isFuelLidOpen, setIsFuelLidOpen] = useState(false);
+  const [fuelAnimationComplete, setFuelAnimationComplete] = useState(false);
 
   // 🔹 STEP STATE
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -69,6 +70,7 @@ export default function App() {
     setCurrentStepIndex(0);
     setFuelLevel(0);
     setIsFuelLidOpen(false);
+    setFuelAnimationComplete(false);
 
     document.body.style.margin = "0";
   };
@@ -129,7 +131,7 @@ export default function App() {
       )}
 
       {/* 🔹 FUEL HUD */}
-      {entered && <FuelGauge fuel={fuelLevel} size={fuelGaugeSize} />}
+      {entered && <FuelGauge fuel={fuelLevel} size={fuelGaugeSize} isAnimationComplete={fuelAnimationComplete} />}
 
       {entered && (
         <div
@@ -245,6 +247,7 @@ export default function App() {
               isFuelLidOpen={isFuelLidOpen}
               setIsFuelLidOpen={setIsFuelLidOpen}
               currentStepIndex={currentStepIndex}
+              onFuelAnimationComplete={() => setFuelAnimationComplete(true)}
             />
           )}
         </Suspense>

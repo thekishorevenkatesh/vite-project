@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 type FuelGaugeProps = {
   fuel: number;
   size?: number; // optional
+  isAnimationComplete?: boolean; // Track if fuel fill animation is done
 };
 
-export function FuelGauge({ fuel, size }: FuelGaugeProps) {
+export function FuelGauge({ fuel, size, isAnimationComplete = true }: FuelGaugeProps) {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -50,7 +51,7 @@ export function FuelGauge({ fuel, size }: FuelGaugeProps) {
           style={{
             width: `${fuel}%`,
             height: "100%",
-            background: fuel === 100 ? "#00e676" : "#ffae00",
+            background: fuel === 100 && isAnimationComplete ? "#00e676" : "#ffae00",
             transition: "width 0.4s ease",
           }}
         />

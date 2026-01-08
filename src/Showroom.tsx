@@ -8,9 +8,10 @@ type Props = {
   setFuelLevel: (v: number) => void;
   isFuelLidOpen: boolean;
   showMessage: (msg: string) => void;
+  onFuelAnimationComplete: () => void;
 };
 
-export function Showroom({ setFuelLevel, isFuelLidOpen, showMessage }: Props) {
+export function Showroom({ setFuelLevel, isFuelLidOpen, showMessage, onFuelAnimationComplete }: Props) {
   const { scene } = useGLTF("/showroom.glb");
 
   const bikeRef = useRef<THREE.Object3D>(null);
@@ -27,9 +28,11 @@ export function Showroom({ setFuelLevel, isFuelLidOpen, showMessage }: Props) {
       <group position={FUEL_CAN_START}>
         <FuelCan
           isFuelLidOpen={isFuelLidOpen}
-          onFillFuel={() => setFuelLevel(100)}
+          onFillFuel={() => {}}
           showMessage={showMessage}
           onFuelFilled={() => {
+            setFuelLevel(100);
+            onFuelAnimationComplete();
             window.dispatchEvent(new Event("STEP_NEXT"));
           }}
         />

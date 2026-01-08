@@ -15,6 +15,7 @@ interface ShowroomProps {
   isFuelLidOpen: boolean;
   setIsFuelLidOpen: (v: boolean) => void;
   currentStepIndex: number;
+  onFuelAnimationComplete: () => void;
 }
 
 export function ShowroomScene({
@@ -23,6 +24,7 @@ export function ShowroomScene({
   isFuelLidOpen,
   setIsFuelLidOpen,
   currentStepIndex,
+  onFuelAnimationComplete,
 }: ShowroomProps) {
   /* ------------------------------------------------------------------ */
   /* CAMERA + CONTROLS RESET (CRITICAL FIX) */
@@ -105,6 +107,7 @@ export function ShowroomScene({
         setFuelLevel={setFuelLevel}
         isFuelLidOpen={isFuelLidOpen}
         showMessage={setPopupMessage}
+        onFuelAnimationComplete={onFuelAnimationComplete}
       />
 
       {/* 🔹 BIKE INTERACTIONS */}
