@@ -12,7 +12,7 @@ export function FuelStream({ canRef, enabled }: FuelStreamProps) {
     const materialRef = useRef<THREE.ShaderMaterial>(null!);
 
     /* ---------------- World helpers ---------------- */
-    const spoutWorldPos = new THREE.Vector3();
+    
     const targetWorldPos = new THREE.Vector3();
     const emitDir = new THREE.Vector3(0, -1, 0);
 
@@ -79,7 +79,7 @@ export function FuelStream({ canRef, enabled }: FuelStreamProps) {
             return;
         }
 
-        const can = canRef.current;
+       
 
         if (enabled) {
             // Update shader time uniform for animation
@@ -117,47 +117,7 @@ export function FuelStream({ canRef, enabled }: FuelStreamProps) {
                 <primitive object={shaderMaterial} ref={materialRef} attach="material" />
             </mesh>
             
-            {/* Visualize spout position and local axes
-            <group position={[0, 0.5, 0.2]}>
-                {/* X axis - Red line *
-                <line>
-                    <bufferGeometry>
-                        <bufferAttribute
-                            attach="attributes-position"
-                            args={[new Float32Array([0, 0, 0, 0.3, 0, 0]), 3]}
-                        />
-                    </bufferGeometry>
-                    <lineBasicMaterial color="red" />
-                </line>
-                
-                {/* Y axis - Green line 
-                <line>
-                    <bufferGeometry>
-                        <bufferAttribute
-                            attach="attributes-position"
-                            args={[new Float32Array([0, 0, 0, 0, 0.3, 0]), 3]}
-                        />
-                    </bufferGeometry>
-                    <lineBasicMaterial color="green" />
-                </line>
-                
-                {/* Z axis - Blue line 
-                <line>
-                    <bufferGeometry>
-                        <bufferAttribute
-                            attach="attributes-position"
-                            args={[new Float32Array([0, 0, 0, 0, 0, 0.3]), 3]}
-                        />
-                    </bufferGeometry>
-                    <lineBasicMaterial color="blue" />
-                </line>
-                
-                {/* Small sphere at origin *
-                <mesh>
-                    <sphereGeometry args={[0.03]} />
-                    <meshBasicMaterial color="yellow" />
-                </mesh>
-            </group> */}
+           
         </>
     );
 }
