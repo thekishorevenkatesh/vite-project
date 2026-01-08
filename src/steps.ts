@@ -18,7 +18,7 @@ export const STEPS = [
   {
     id: "step_003",
     name: "Fill the fuel",
-    description: "Fill fuel using funnel and fuel can",
+    description: "Fill fuel using the fuel can",
     functionalComponent: [
       {
         component: "FUEL_CAN",
